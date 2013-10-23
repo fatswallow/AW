@@ -33,8 +33,9 @@ public class TTSDemo extends Activity implements OnInitListener {
             
             @Override
             public void onClick(View arg0) {
-                // TODO Auto-generated method stub
+                Log.d(TAG, "onClick()");
                 mTts.speak(inputText.getText().toString(), TextToSpeech.QUEUE_ADD, null);
+                mTts.synthesizeToFile(inputText.getText().toString(), null, "/mnt/sdcard/TTS.wav");
             }
         });
         mTts = new TextToSpeech(this, this);
@@ -49,7 +50,6 @@ public class TTSDemo extends Activity implements OnInitListener {
 
     @Override
     protected void onPause() {
-        // TODO Auto-generated method stub
         super.onPause();
         if (mTts != null) {
             mTts.stop();
@@ -58,7 +58,6 @@ public class TTSDemo extends Activity implements OnInitListener {
 
     @Override
     protected void onDestroy() {
-        // TODO Auto-generated method stub
         super.onDestroy();
         if (mTts != null) {
             mTts.shutdown();
@@ -68,19 +67,16 @@ public class TTSDemo extends Activity implements OnInitListener {
 
     @Override
     public void onInit(int status) {
-        // TODO Auto-generated method stub
         if(status == TextToSpeech.SUCCESS)
         {
-            //…Ë÷√∑¢“Ù”Ô—‘
             int result = mTts.setLanguage(Locale.US);
-            
-            //≈–∂œ”Ô—‘ «∑Òø…”√
+
             if(result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED)
             {
                 Log.v(TAG, "Language is not available");
                 speakBtn.setEnabled(false);
             }
-            else  
+            else
             {
                 mTts.speak("This is an example of speech synthesis.", TextToSpeech.QUEUE_ADD, null);
                 speakBtn.setEnabled(true);
