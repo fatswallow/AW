@@ -9,6 +9,7 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.media.audiofx.BassBoost;
+import android.media.audiofx.LoudnessEnhancer;
 import android.media.audiofx.Visualizer;
 import android.media.audiofx.Visualizer.OnDataCaptureListener;
 import android.os.Bundle;
@@ -36,20 +37,21 @@ public class Effects extends Activity {
     private FileInputStream fin;
     private DataInputStream dis;
     private String path = "/data/a.wav";
-    byte[] s1;
-    int bufferSize = 512;
-    Thread t;
-    boolean isRunning = true;
+    private byte[] s1;
+    private int bufferSize = 512;
+    private Thread t;
+    private boolean isRunning = true;
+    private LinearLayout mLayout;
+    
     private BassBoost mBass;
-    SeekBar fSlider;
-    short bassStrength = 0;
-    //LoudnessEnhancer loudness;
+    //private SeekBar fSlider;
+    //private short bassStrength = 0;
     
     private Visualizer mVisualizer;
-    private LinearLayout mLayout;
     private static final float VISUALIZER_HEIGHT_DIP = 500f;
-    VisualizerView mVisualizerView;
+    private VisualizerView mVisualizerView;
 
+    private LoudnessEnhancer mLoudness;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,6 +84,7 @@ public class Effects extends Activity {
         }
         
         setupBassBoostAndUi();
+        setupLoudnessEnhancerAndUi();
         setupVisualizerFxAndUi();
         
         t = new Thread() {
@@ -108,6 +111,7 @@ public class Effects extends Activity {
         
         mBass.setEnabled(true);
         mVisualizer.setEnabled(true);
+        mLoudness.setEnabled(true);
     }
 
     private void setupBassBoostAndUi()
@@ -115,10 +119,10 @@ public class Effects extends Activity {
         mBass = new BassBoost(0, at.getAudioSessionId());
         
         TextView tv = new TextView(this);
-        tv.setText("bass boost");
+        tv.setText("Bass Boost");
         mLayout.addView(tv);
 
-        fSlider = new SeekBar(this);
+        SeekBar fSlider = new SeekBar(this);
         mLayout.setOrientation(LinearLayout.VERTICAL);
         mLayout.addView(fSlider);
         
@@ -134,9 +138,39 @@ public class Effects extends Activity {
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean arg2) {
-                bassStrength = (short) (1000 * progress / seekBar.getMax());
+                short bassStrength = (short) (1000 * progress / seekBar.getMax());
                 Log.d("abao", "bassStrength=" + bassStrength);
                 mBass.setStrength(bassStrength);
+            }
+        });
+    }
+    private void setupLoudnessEnhancerAndUi()
+    {
+        mLoudness = new LoudnessEnhancer(at.getAudioSessionId());
+        
+        TextView tv = new TextView(this);
+        tv.setText("Loudness Enhancer");
+        mLayout.addView(tv);
+
+        SeekBar fSlider = new SeekBar(this);
+        mLayout.setOrientation(LinearLayout.VERTICAL);
+        mLayout.addView(fSlider);
+        
+        fSlider.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
+
+            @Override
+            public void onStopTrackingTouch(SeekBar arg0) {
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar arg0) {
+            }
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean arg2) {
+                int targetGainmB = (short) (1000 * progress / seekBar.getMax());
+                Log.d("abao", "targetGainmB=" + targetGainmB);
+                mLoudness.setTargetGain(targetGainmB);
             }
         });
     }
@@ -196,6 +230,7 @@ public class Effects extends Activity {
         t = null;
         mBass.release();
         mVisualizer.release();
+        mLoudness.release();
         at.release();
     }
     
