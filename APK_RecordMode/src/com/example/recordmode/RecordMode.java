@@ -124,6 +124,19 @@ public class RecordMode extends Activity implements View.OnClickListener {
                 //实例化AudioRecord
                 AudioRecord record = new AudioRecord(MediaRecorder.AudioSource.DEFAULT, frequence, channelConfig, audioEncoding, bufferSize);
                 Log.e(TAG, "record=" + record);
+                
+                int sessionId = record.getAudioSessionId();
+                AutomaticGainControl agc = AutomaticGainControl.create(sessionId);
+                agc.setEnabled(true);
+                Log.d(TAG, "agc enabled=" + agc.getEnabled());
+                AcousticEchoCanceler aec = AcousticEchoCanceler.create(sessionId);
+                //aec.setEnabled(true);
+                Log.d(TAG, "aec enabled=" + aec.getEnabled());
+                NoiseSuppressor ns = NoiseSuppressor.create(sessionId);
+                //ns.setEnabled(true);
+                Log.d(TAG, "ns enabled=" + ns.getEnabled());
+                //Log.d(TAG, "AGC created");
+                
                 //定义缓冲
                 short[] buffer = new short[bufferSize];
  
